@@ -770,3 +770,5 @@ if __name__ == '__main__':
         sys.exit(0)
 
 
+# pyinstaller --onefile --windowed --icon=/Users/nathanm/Downloads/to_do-main/CheXy.png --name CheXy todo_main.py
+# pyinstaller --onefile --noconsole --icon=/Users/nathanm/Downloads/to_do-main/CheXy.png --name CheXy todo_main.py
