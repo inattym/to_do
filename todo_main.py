@@ -2,6 +2,7 @@ import sys
 import datetime
 import pickle
 import pandas as pd
+import updater
 from plyer import notification
 
 from PyQt5.QtCore import Qt, QTimer
@@ -12,10 +13,7 @@ from PyQt5.QtWidgets import (QApplication, QDialog, QFileDialog, QFrame, QGridLa
                              QCheckBox, QComboBox, QDateEdit, QDialogButtonBox, QFormLayout, QInputDialog)
 
 
-
-
-
-CURRENT_VERSION = "1.0.0"
+CURRENT_VERSION = "0.1.0"
 
 
 class Schedule:
@@ -42,8 +40,11 @@ class ScheduleApp(QMainWindow):
     Main application window for the Schedule management system.
     """
     def __init__(self):
-        # Initializes the main window and its UI components.
+        # First, try updating
+        updater.try_update(CURRENT_VERSION);
 
+
+        # Initializes the main window and its UI components.
         super().__init__()
         self.schedules = self.load_schedules()
         self.initUI()
