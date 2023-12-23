@@ -12,7 +12,7 @@
         py = pkgs.python311Packages;
       in {
         devShells.default = pkgs.mkShell {
-          nativeBuildInputs = [ py.pyqt5 py.datetime py.pandas py.plyer py.pygithub qt.qtbase ];
+          nativeBuildInputs = [ py.pyqt5 py.datetime py.pandas py.plyer py.requests qt.qtbase ];
           QT_QPA_PLATFORM_PLUGIN_PATH="${qt.qtbase.bin}/lib/qt-${qt.qtbase.version}/plugins";
         };
       });

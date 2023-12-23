@@ -13,7 +13,7 @@ from PyQt5.QtWidgets import (QApplication, QDialog, QFileDialog, QFrame, QGridLa
                              QCheckBox, QComboBox, QDateEdit, QDialogButtonBox, QFormLayout, QInputDialog)
 
 
-CURRENT_VERSION = "0.1.0"
+CURRENT_VERSION = "v1.02"
 
 
 class Schedule:
@@ -42,7 +42,6 @@ class ScheduleApp(QMainWindow):
     def __init__(self):
         # First, try updating
         updater.try_update(CURRENT_VERSION);
-
 
         # Initializes the main window and its UI components.
         super().__init__()
