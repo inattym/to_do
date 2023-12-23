@@ -2,12 +2,12 @@
 
 
 a = Analysis(
-    ['todo_main.py'],
+    ['/Users/nathanm/Downloads/to_do-main/todo_main.py'],
     pathex=[],
     binaries=[],
     datas=[],
     hiddenimports=[],
-    hookspath=[],
+    hookspath=['/Users/nathanm/Downloads/to_do-main/'],
     hooksconfig={},
     runtime_hooks=[],
     excludes=[],

@@ -771,4 +771,4 @@ if __name__ == '__main__':
 
 
 # pyinstaller --onefile --windowed --icon=/Users/nathanm/Downloads/to_do-main/CheXy.png --name CheXy todo_main.py
-# pyinstaller --onefile --noconsole --icon=/Users/nathanm/Downloads/to_do-main/CheXy.png --name CheXy todo_main.py
+# pyinstaller --onefile --windowed --icon=/Users/nathanm/Downloads/to_do-main/CheXy.png --name CheXy --additional-hooks-dir=/Users/nathanm/Downloads/to_do-main/ /Users/nathanm/Downloads/to_do-main/todo_main.py
