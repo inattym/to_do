@@ -2,16 +2,14 @@ import sys
 import datetime
 import pickle
 import pandas as pd
-from PyQt5.QtCore import Qt, QTimer
-from PyQt5.QtGui import QFont, QIcon
-from PyQt5.QtWidgets import (QApplication, QMainWindow, QWidget, QVBoxLayout, QPushButton, QLabel,
-                             QCalendarWidget, QInputDialog, QMessageBox, QDialog, QComboBox,
-                             QFileDialog, QHBoxLayout, QSizePolicy, QScrollArea, QFrame, QGridLayout,
-                             QCheckBox, QDialogButtonBox, QLineEdit, QFormLayout, QDateEdit, QTimeEdit,
-                             QSystemTrayIcon, QMenu)
 from plyer import notification
 
-
+from PyQt5.QtCore import Qt, QTimer
+from PyQt5.QtGui import QFont, QIcon, QPainter, QPixmap
+from PyQt5.QtWidgets import (QApplication, QDialog, QFileDialog, QFrame, QGridLayout, QHBoxLayout,
+                             QLabel, QLineEdit, QMainWindow, QMenu, QMessageBox, QPushButton, QScrollArea,
+                             QSizePolicy, QSystemTrayIcon, QTimeEdit, QVBoxLayout, QWidget, QCalendarWidget,
+                             QCheckBox, QComboBox, QDateEdit, QDialogButtonBox, QFormLayout, QInputDialog)
 
 
 
@@ -40,35 +38,49 @@ class Schedule:
             self.starred = False
 
 class ScheduleApp(QMainWindow):
+    """
+    Main application window for the Schedule management system.
+    """
     def __init__(self):
+        # Initializes the main window and its UI components.
+
         super().__init__()
         self.schedules = self.load_schedules()
         self.initUI()
         self.initNotificationTimer()  # initialize the timer for notifications
-        # Set the application icon
-        self.setWindowIcon(QIcon('/Users/nathanm/Documents/Personal/CS/TODO APP/to_to_appicon.ico'))
-        self.initUI()
 
-        # Create a system tray icon
-        self.tray_icon = QSystemTrayIcon(self)
-        self.tray_icon.setIcon(
-            QIcon('/Users/nathanm/Documents/Personal/CS/TODO APP/to_to_appicon.ico'))  # Use your app icon
+        # Define the symbol and font for the icon
+        symbol = '✔︎'
+        font = QFont("Arial", 72)  # Adjust the font and size as necessary
+
+        # Create a QPixmap, render the symbol onto it, and convert it to QIcon
+        pixmap = QPixmap(64, 64)  # Adjust size as needed for visibility
+        pixmap.fill(Qt.transparent)  # Set background transparent
+        painter = QPainter(pixmap)
+        painter.setPen(Qt.darkBlue)  # Set the pen color to black or any color that makes the icon visible
+        painter.setFont(font)
+        painter.drawText(pixmap.rect(), Qt.AlignCenter, symbol)  # Draw the symbol in the center
+        painter.end()
+        icon = QIcon(pixmap)
+
+        # Set the application and tray icons using the symbol
+        self.setWindowIcon(icon)
+        self.tray_icon = QSystemTrayIcon(icon, self)
 
         # Create a menu for the tray icon
         tray_menu = QMenu()
-        open_action = tray_menu.addAction("Open ScheduleApp")
+        open_action = tray_menu.addAction("Open CheXy")
         open_action.triggered.connect(self.show)  # Reopen the window
         exit_action = tray_menu.addAction("Exit")
-        exit_action.triggered.connect(self.close)
-
+        exit_action.triggered.connect(self.quit_application)  # Quit the application completely
         self.tray_icon.setContextMenu(tray_menu)
         self.tray_icon.show()
 
-
     def initUI(self):
-        self.setWindowTitle(f"Schedule Management v{CURRENT_VERSION}")  # Include version in title
+        # Sets up the user interface, layout, and widgets.
 
-        self.setWindowTitle("Schedule Management")
+        self.setWindowTitle(f"CheXy v{CURRENT_VERSION}")  # Correctly include version in title
+
         self.setGeometry(400, 200, 800, 600)
         self.setMinimumSize(700, 550)
 
@@ -98,6 +110,8 @@ class ScheduleApp(QMainWindow):
         self.display_all_tasks()
 
     def create_buttons(self, layout):
+        # Creates and arranges interactive buttons in the given layout.
+
         buttons_info = [
             ("➕️", self.add_schedule),
             ("🗑️️", self.delete_schedule),
@@ -114,6 +128,8 @@ class ScheduleApp(QMainWindow):
             layout.addWidget(button)
 
     def create_calendar(self, layout):
+        # Creates a calendar widget and adds it to the given layout.
+
         calendar_frame = QFrame()
         calendar_frame.setStyleSheet("background-color: white; border-radius: 10px;")
         calendar_layout = QVBoxLayout(calendar_frame)
@@ -123,6 +139,8 @@ class ScheduleApp(QMainWindow):
         layout.addWidget(calendar_frame)
 
     def create_category_frames(self, layout):
+        # Creates frames for different task categories like Today, Up-Coming, etc.
+
         categories_layout = QGridLayout()
         categories = [
             ("Today", self.display_today_tasks),
@@ -142,6 +160,8 @@ class ScheduleApp(QMainWindow):
         layout.addLayout(categories_layout)
 
     def create_category_frame(self, title, callback):
+        # Creates a single category frame with the given title and callback function.
+
         frame = QFrame()
         frame.mousePressEvent = lambda event: callback()
         layout = QVBoxLayout(frame)
@@ -157,6 +177,8 @@ class ScheduleApp(QMainWindow):
 
 
     def create_tasks_area(self, layout):
+        # Sets up the area where tasks will be displayed.
+
         # Add the category label to the top of the tasks area
         self.category_label = QLabel("")  # Create the category label
         self.category_label.setAlignment(Qt.AlignCenter)
@@ -199,23 +221,35 @@ class ScheduleApp(QMainWindow):
 
 
     def display_today_tasks(self):
+        # Filters and displays tasks due today.
+
         today = datetime.datetime.now().date()
         self.display_filtered_tasks(lambda s: s.completion_time.date() == today, "Today")
 
     def display_upcoming_tasks(self):
+        # Filters and displays upcoming tasks.
+
         today = datetime.datetime.now().date()
         self.display_filtered_tasks(lambda s: s.completion_time.date() > today, "Up-Coming")
 
     def display_starred_tasks(self):
+        # Filters and displays starred tasks.
+
         self.display_filtered_tasks(lambda s: s.starred, "Starred")
 
     def display_completed_tasks(self):
+        # Filters and displays completed tasks.
+
         self.display_filtered_tasks(lambda s: s.actual_time is not None, "Completed")
 
     def display_all_tasks(self):
+        # Displays all tasks.
+
         self.display_filtered_tasks(lambda s: True, "All Tasks")
 
     def display_filtered_tasks(self, filter_func, category_name="All Tasks"):
+        # Displays tasks filtered by the given function and updates the category label.
+
         # Set the category name on the category label
         self.category_label.setText(category_name)
 
@@ -230,6 +264,8 @@ class ScheduleApp(QMainWindow):
             self.display_task(schedule)
 
     def display_task(self, schedule):
+        # Displays a single task in the task area.
+
         task_frame = QWidget()
         outer_layout = QHBoxLayout(task_frame)
         outer_layout.setContentsMargins(0, 0, 0, 0)
@@ -275,17 +311,23 @@ class ScheduleApp(QMainWindow):
         self.tasks_layout.addWidget(separator_line)
 
     def get_importance_symbol(self, importance, completed):
+        # Returns a symbol representing the importance of a task.
+
         if completed:
             return {"low": "🗒️", "medium": "🗒️🗒️", "high": "🗒️🗒️🗒️"}.get(importance, "")
         return {"low": "📗", "medium": "📙📙", "high": "📕📕📕"}.get(importance, "")
 
     def apply_grey_style(self, name_label, details_label, star_status):
+        # Applies a grey style to completed tasks for visual distinction.
+
         light_grey_style = "color: #D3D3D3;"
         name_label.setStyleSheet(light_grey_style)
         details_label.setStyleSheet(light_grey_style)
         star_status.setStyleSheet(light_grey_style)
 
     def create_separator_line(self):
+        # Creates a horizontal line for separating tasks visually.
+
         separator_line = QFrame()
         separator_line.setFrameShape(QFrame.HLine)
         separator_line.setFrameShadow(QFrame.Sunken)
@@ -294,6 +336,8 @@ class ScheduleApp(QMainWindow):
         return separator_line
 
     def mark_completed(self, state, schedule):
+        # Marks a task as completed or uncompleted based on the checkbox state.
+
         if state == Qt.Checked:
             schedule.mark_completed(datetime.datetime.now())
         else:
@@ -302,6 +346,8 @@ class ScheduleApp(QMainWindow):
         self.save_schedules()  # Save changes
 
     def get_new_importance(self):
+        # Opens a dialog to select new importance for a task.
+
         dialog = QDialog(self)
         dialog.setWindowTitle("Select New Importance")
         layout = QVBoxLayout(dialog)
@@ -323,6 +369,8 @@ class ScheduleApp(QMainWindow):
             return None, False
 
     def create_calendar(self, layout):
+        # Displays tasks due on a specific date.
+
         calendar_frame = QFrame()
         calendar_frame.setStyleSheet("background-color: white; border-radius: 10px;")
         calendar_layout = QVBoxLayout(calendar_frame)
@@ -333,10 +381,14 @@ class ScheduleApp(QMainWindow):
         layout.addWidget(calendar_frame)
 
     def display_tasks_on_date(self, date):
+        # Displays tasks due on a specific date.
+
         tasks_on_date = [s for s in self.schedules if s.completion_time.date() == date.toPyDate()]
         self.show_tasks_popup(tasks_on_date, date)
 
     def show_tasks_popup(self, tasks, date):
+        # Shows a popup with tasks for a specific date.
+
         dialog = QDialog(self)
         dialog.setWindowTitle(f"Tasks for {date.toString('yyyy-MM-dd')}")
         layout = QVBoxLayout(dialog)
@@ -354,6 +406,8 @@ class ScheduleApp(QMainWindow):
         dialog.exec_()
 
     def add_or_modify_schedule(self, schedule=None):
+        # Adds a new schedule or modifies an existing one.
+
         dialog = QDialog(self)
         dialog.setWindowTitle("Add/Modify Schedule" if schedule else "Add Schedule")
         layout = QFormLayout(dialog)
@@ -415,10 +469,13 @@ class ScheduleApp(QMainWindow):
             self.save_schedules()
 
     def add_schedule(self):
+
         # Directly calls the unified method without a schedule object
         self.add_or_modify_schedule()
 
     def delete_schedule(self):
+        # Deletes a selected schedule.
+
         schedule_to_delete = self.select_schedule("Delete Schedule",
                                                   "Enter keywords to search for the schedule to delete:")
         if schedule_to_delete:
@@ -428,9 +485,13 @@ class ScheduleApp(QMainWindow):
             self.save_schedules()
 
     def normalize_string(self, input_string):
+        # Normalizes a string for comparison purposes.
+
         return ''.join(input_string.lower().split())
 
     def select_schedule_to_modify(self):
+        # Selects a schedule based on user input.
+
         # Create a dialog to choose a schedule
         dialog = QDialog(self)
         dialog.setWindowTitle("Select Schedule to Modify")
@@ -457,6 +518,8 @@ class ScheduleApp(QMainWindow):
 
 
     def select_schedule(self, title, prompt):
+        # Selects a schedule based on user input.
+
         keyword, ok = QInputDialog.getText(self, title, prompt)
         if ok and keyword:
             matching_schedules = self.search_tasks_by_keyword(keyword)
@@ -476,13 +539,16 @@ class ScheduleApp(QMainWindow):
         return None
 
     def modify_schedule(self):
-        # Select a schedule to modify
+        # Modifies a selected schedule.
+
         schedule_to_modify = self.select_schedule("Modify Schedule",
                                                   "Enter keywords to search for the schedule to modify:")
         if schedule_to_modify:
             self.add_or_modify_schedule(schedule_to_modify)
 
     def modify_selected_schedule(self, schedule):
+        # Modifies the selected schedule with new details.
+
         new_name, ok = QInputDialog.getText(self, 'New Name', 'Enter new name (leave blank for no change):')
         if ok:
             new_importance, ok = self.get_new_importance()
@@ -517,10 +583,14 @@ class ScheduleApp(QMainWindow):
                         self.save_schedules()  # Save changes
 
     def search_tasks_by_keyword(self, keyword):
+        # Searches tasks by a given keyword.
+
         normalized_keyword = self.normalize_string(keyword)
         return [schedule for schedule in self.schedules if normalized_keyword in self.normalize_string(schedule.name)]
 
     def star_task(self):
+        # Toggles the star status of a selected task.
+
         keyword, ok = QInputDialog.getText(self, 'Star Schedule', 'Enter keywords to search for the schedule:')
         if ok and keyword:
             matching_schedules = self.search_tasks_by_keyword(keyword)
@@ -544,11 +614,15 @@ class ScheduleApp(QMainWindow):
             self.save_schedules()
 
     def initNotificationTimer(self):
+        # Initializes a timer to periodically check for upcoming tasks and notify the user.
+
         self.timer = QTimer(self)
         self.timer.timeout.connect(self.check_for_upcoming_tasks)
         self.timer.start(1000)  # Check every 1 second
 
     def check_for_upcoming_tasks(self):
+        # Checks for upcoming tasks and triggers notifications as needed.
+
         current_datetime = datetime.datetime.now()
         for schedule in self.schedules:
             if schedule.actual_time or schedule.notification_shown:  # Skip if task is done or notification shown
@@ -573,17 +647,16 @@ class ScheduleApp(QMainWindow):
     def notify_user(self, schedule, message):
         try:
             if not schedule.notification_shown:  # Check if notification has already been shown
-                # Determine the type of notification based on importance
                 notificationMessage = f"'{schedule.name}' is {message}."
                 if schedule.importance in ['high']:  # or whatever criteria you define for "important"
-                    # Show both slide-in and popup notifications for important tasks
+                    # Show slide-in notification
                     notification.notify(
                         title='Important Task Reminder',
-                        message=notificationMessage + " (important) Right-click the tray icon to open.",
+                        message=notificationMessage + " Right-click the tray icon to open.",
                         app_name='ScheduleApp'
                     )
-                    QMessageBox.information(self, "Important Task Reminder",
-                                            notificationMessage + " Please check the Schedule App for more details.")
+                    # Show custom popup that ensures the main window is focused after closing
+                    self.show_custom_popup(notificationMessage)
 
                 else:
                     # Show only slide-in notifications for less important tasks
@@ -597,7 +670,27 @@ class ScheduleApp(QMainWindow):
         except Exception as e:
             print("Failed to show notification:", e)
 
+    def show_custom_popup(self, message):
+        # Custom method to show a popup and focus the main window after closing
+        msgBox = QMessageBox()
+        msgBox.setIcon(QMessageBox.Information)
+        # Modify the message below as needed
+        customMessage = f"Reminder: {message}\nPlease check the schedule for more details."
+        msgBox.setText(customMessage)
+        msgBox.setWindowTitle("Task Reminder")
+        msgBox.setStandardButtons(QMessageBox.Ok)
+        msgBox.buttonClicked.connect(self.on_popup_closed)  # Connect the closed event to a custom handler
+        msgBox.exec_()
+
+    def on_popup_closed(self, i):
+        # Custom handler for when the popup is closed
+        self.show()  # Show the main window
+        self.raise_()  # Bring the main window to the front
+        self.activateWindow()  # Focus the main window
+
     def closeEvent(self, event):
+        # Reimplements the close event to minimize to tray instead of exiting.
+
         """Reimplement the close event to minimize to tray instead of exiting."""
         event.ignore()
         self.hide()  # Hide the window
@@ -609,6 +702,8 @@ class ScheduleApp(QMainWindow):
         )
 
     def export_schedules(self):
+        # Exports schedules to an Excel file.
+
         file_path, _ = QFileDialog.getSaveFileName(self, "Save File", "", "Excel files (*.xlsx)")
         if file_path:
             # Ensure the file has the correct extension
@@ -634,8 +729,14 @@ class ScheduleApp(QMainWindow):
             except Exception as e:
                 QMessageBox.critical(self, "Error", f"An error occurred while exporting schedules: {e}")
 
+    def quit_application(self):
+        #Ensures a clean exit
+        self.tray_icon.hide()  # Optional: hide the tray icon immediately
+        QApplication.quit()  # Quit the application
 
     def save_schedules(self):
+        # Saves schedules to a file using pickle.
+
         try:
             with open('schedules.pkl', 'wb') as output:
                 pickle.dump(self.schedules, output, pickle.HIGHEST_PROTOCOL)
@@ -643,13 +744,15 @@ class ScheduleApp(QMainWindow):
             QMessageBox.critical(self, "Error", f"An error occurred while saving schedules: {e}")
 
     def load_schedules(self):
+        # Loads schedules from a file using pickle.
+
         try:
             with open('schedules.pkl', 'rb') as input:
                 schedules = pickle.load(input)
                 for schedule in schedules:
-                    schedule.ensure_starred_attribute()  # existing line
+                    schedule.ensure_starred_attribute()
                     if not hasattr(schedule, 'notification_shown'):
-                        schedule.notification_shown = False  # add this line
+                        schedule.notification_shown = False
                 return schedules
         except (FileNotFoundError, EOFError):
             return []

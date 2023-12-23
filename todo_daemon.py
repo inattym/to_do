@@ -20,7 +20,7 @@ def notify_user(schedule, message):
     notification.notify(
         title='Task Reminder',
         message=f"'{schedule.name}' is {message}!",
-        app_name='ScheduleApp'
+        app_name='CheXy'
     )
 
 def check_for_upcoming_tasks():
