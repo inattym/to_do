@@ -1,3 +1,4 @@
+import os
 import sys
 import datetime
 import pickle
@@ -735,19 +736,19 @@ class ScheduleApp(QMainWindow):
         QApplication.quit()  # Quit the application
 
     def save_schedules(self):
-        # Saves schedules to a file using pickle.
-
         try:
-            with open('schedules.pkl', 'wb') as output:
+            home_dir = os.path.expanduser('~')
+            file_path = os.path.join(home_dir, 'schedules.pkl')  # Save in the home directory
+            with open(file_path, 'wb') as output:
                 pickle.dump(self.schedules, output, pickle.HIGHEST_PROTOCOL)
         except Exception as e:
             QMessageBox.critical(self, "Error", f"An error occurred while saving schedules: {e}")
 
     def load_schedules(self):
-        # Loads schedules from a file using pickle.
-
         try:
-            with open('schedules.pkl', 'rb') as input:
+            home_dir = os.path.expanduser('~')
+            file_path = os.path.join(home_dir, 'schedules.pkl')
+            with open(file_path, 'rb') as input:
                 schedules = pickle.load(input)
                 for schedule in schedules:
                     schedule.ensure_starred_attribute()
