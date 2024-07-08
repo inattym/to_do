@@ -14,7 +14,7 @@ from PyQt5.QtWidgets import (QApplication, QDialog, QFileDialog, QFrame, QGridLa
                              QCheckBox, QComboBox, QDateEdit, QDialogButtonBox, QFormLayout, QInputDialog)
 
 
-CURRENT_VERSION = "v1.02"
+CURRENT_VERSION = "1.0.2"
 
 
 class Schedule:
