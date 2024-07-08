@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<key>CFBundleDisplayName</key>
+	<string>CheXy</string>
+	<key>CFBundleExecutable</key>
+	<string>CheXy</string>
+	<key>CFBundleIconFile</key>
+	<string>generated-26f0aa25badec3d7f85e39e3cfa7bd4ca373879ba4ad24abd6ef4124f7c7f538.icns</string>
+	<key>CFBundleIdentifier</key>
+	<string>CheXy</string>
+	<key>CFBundleInfoDictionaryVersion</key>
+	<string>6.0</string>
+	<key>CFBundleName</key>
+	<string>CheXy</string>
+	<key>CFBundlePackageType</key>
+	<string>APPL</string>
+	<key>CFBundleShortVersionString</key>
+	<string>0.0.0</string>
+	<key>NSHighResolutionCapable</key>
+	<true/>
+</dict>
+</plist>

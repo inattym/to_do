@@ -1,0 +1,1 @@
+([('CheXy', '/Users/nathanm/Downloads/to_do-main/dist/CheXy', 'EXECUTABLE')],)
