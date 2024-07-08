@@ -16,7 +16,6 @@ from PyQt5.QtWidgets import (QApplication, QDialog, QFileDialog, QFrame, QGridLa
 
 CURRENT_VERSION = "1.0.2"
 
-
 class Schedule:
     def __init__(self, name, importance, completion_time, in_charge, reminder_time):
         self.name = name
